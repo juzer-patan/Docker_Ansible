@@ -1,0 +1,37 @@
+- hosts: all
+  tasks:
+  -  name: Create repository for docker
+     yum_repository:
+       name: docker_repo
+       baseurl: "https://download.docker.com/linux/centos/7/x86_64/stable/"
+       description: Docker Repo
+       gpgcheck: no 
+  -  name: Install docker
+     command: "yum install docker-ce -y --nobest"    
+  -  name: Start docker services
+     service:
+       name: "docker"
+       state: started
+  - name: Install docker-py library
+    pip: 
+      name: docker-py
+      state: present
+  - name: Pull docker image
+    docker_image:
+      name: "httpd"
+      source: pull
+  - name: Copy Webpage to Manage Node
+    copy: 
+      src: "juzer.html"
+      dest: "/task" 
+  - name: Run Docker Container
+    docker_container:
+      name: "TaskHttpdOS"
+      image: httpd
+      exposed_ports:
+      - '80'         
+      ports:
+      - "7000:80"
+      volumes:
+      - /task:/usr/local/apach2/htdocs/
+      state: started      
